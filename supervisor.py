@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+from multiprocessing import get_logger
 import psutil
 import threading
 import logging
@@ -8,18 +9,19 @@ import sys
 
 
 def getLogger():
-    logger = logging.getLogger("test_task")
-    logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger()
+    logger.setLevel(logging.NOTSET)
  
     handler = logging.StreamHandler(sys.stdout)
-    fmt = '%(asctime)s - %(threadName)s - %(levelname)s - %(message)s'
+    handler.setLevel(logging.DEBUG)
+    fmt = '%(asctime)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt)
     handler.setFormatter(formatter)
  
     logger.addHandler(handler)
     return logger
 
-def checkIfProcessRunning(processName):
+def checkIfProcessRunning(processName, logger):
     '''
     Check if there is any running process that contains the given name processName.
     '''
@@ -41,5 +43,6 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--interval', help='Check interval in seconds')
 
     args = parser.parse_args()
-    #thread = threading.Thread(name='supervisor', target=checkIfProcessRunning('bash'))
-    #thread.start()
+    logger = getLogger()
+    thread = threading.Thread(name='supervisor', target=checkIfProcessRunning, args=(args.name, logger))
+    thread.start()
